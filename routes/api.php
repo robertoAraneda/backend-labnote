@@ -19,15 +19,31 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::group([
-  'prefix' => 'auth'
+  'prefix' => 'auth',
 ], function () {
   Route::post('login', 'AuthController@login');
   Route::post('signup', 'AuthController@signup');
+});
 
+Route::group([
+  'prefix' => 'v2',
+  'middleware' => 'auth:api'
+], function () {
+  Route::get('logout', 'AuthController@logout');
+  Route::get('user', 'AuthController@user');
+  Route::apiResource('states', 'StateController');
+  Route::apiResource('workareas', 'WorkareaController');
+  Route::apiResource('sections', 'SectionController');
   Route::group([
+    'prefix' => 'states',
     'middleware' => 'auth:api'
   ], function () {
-    Route::get('logout', 'AuthController@logout');
-    Route::get('user', 'AuthController@user');
+    Route::get('{idState}/sections', 'StateController@sections');
+    Route::get('{idState}/workareas', 'StateController@workareas');
   });
 });
+
+
+// Route::post('/login', 'AuthController@login');
+
+// Route::middleware('auth:api')->post('/logout', 'AuthController@logout');
