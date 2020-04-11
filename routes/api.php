@@ -18,6 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
   return $request->user();
 });
 
+
+
 Route::group([
   'prefix' => 'auth',
 ], function () {
@@ -32,14 +34,23 @@ Route::group([
   Route::get('logout', 'AuthController@logout');
   Route::get('user', 'AuthController@user');
   Route::apiResource('states', 'StateController');
-  Route::apiResource('workareas', 'WorkareaController');
+  Route::apiResource('work-areas', 'WorkAreaController');
   Route::apiResource('sections', 'SectionController');
+  Route::apiResource('vih-keys', 'VihKeyController');
   Route::group([
     'prefix' => 'states',
     'middleware' => 'auth:api'
   ], function () {
     Route::get('{idState}/sections', 'StateController@sections');
-    Route::get('{idState}/workareas', 'StateController@workareas');
+    Route::get('{idState}/work-areas', 'StateController@workAreas');
+    Route::get('{idState}/vih-keys', 'StateController@vihKeys');
+  });
+
+  Route::group([
+    'prefix' => 'sections',
+    'middleware' => 'auth:api'
+  ], function () {
+    Route::get('{idsection}/work-areas', 'SectionController@workAreas');
   });
 });
 

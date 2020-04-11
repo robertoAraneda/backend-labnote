@@ -24,7 +24,7 @@ class State extends JsonResource
       'updated_at' => $this->updated_at != null ?  Carbon::parse($this->updated_at)->format('Y-m-d H:i:s') : null,
       'deleted_at' => $this->deleted_at != null ?  Carbon::parse($this->deleted_at)->format('Y-m-d H:i:s') : null,
       'links' => [
-        'href' => url('api/v2/state/' . $this->id),
+        'href' => url('api/v2/states/' . $this->id),
         'rel' => 'self'
       ]
     ];

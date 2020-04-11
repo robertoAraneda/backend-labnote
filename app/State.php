@@ -22,6 +22,10 @@ class State extends Model
       'created_at' => $this->created_at != null ?  Carbon::parse($this->created_at)->format('Y-m-d H:i:s') : null,
       'updated_at' => $this->updated_at != null ?  Carbon::parse($this->updated_at)->format('Y-m-d H:i:s') : null,
       'deleted_at' => $this->deleted_at != null ?  Carbon::parse($this->deleted_at)->format('Y-m-d H:i:s') : null,
+      'links' => [
+        'href' => url('api/v2/states/' . $this->id),
+        'rel' => 'self'
+      ]
     ];
   }
 
@@ -33,5 +37,10 @@ class State extends Model
   public function sections()
   {
     return $this->hasMany(Section::class);
+  }
+
+  public function vihKeys()
+  {
+    return $this->hasMany(VihKey::class);
   }
 }

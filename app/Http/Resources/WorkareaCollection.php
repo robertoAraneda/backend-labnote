@@ -15,9 +15,9 @@ class WorkareaCollection extends ResourceCollection
   public function toArray($request)
   {
     return [
-      'workareas' => $this->collection,
+      'workAreas' => $this->collection,
       'links' => [
-        'href' => url('api/v2/workareas'),
+        'href' => url('api/v2/work-areas'),
         'rel' => 'self'
       ]
     ];
