@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\WorkareaCollection;
-use App\WorkArea;
+use App\Http\Resources\Collections\WorkareaCollection;
+use App\Models\WorkArea;
 use Illuminate\Support\Facades\DB;
 
 class WorkAreaController extends Controller
 {
   /**
-   * Display a listing of the resource.
+   * List of WorkAreas.
    *
    * @return \Illuminate\Http\Response
    */
@@ -28,7 +28,7 @@ class WorkAreaController extends Controller
   }
 
   /**
-   * Store a newly created resource in storage.
+   * Store a WorkArea.
    *
    * @return \Illuminate\Http\Response
    */
@@ -44,14 +44,14 @@ class WorkAreaController extends Controller
 
       $workarea = $workarea->create($dataStore);
 
-      return $this->responseSuccess($workarea->formatModel());
+      return $this->responseSuccess($workarea->format());
     } catch (\Exception $exception) {
       return $this->responseException($exception);
     }
   }
 
   /**
-   * Display the specified resource.
+   * Display one WorkArea.
    *
    * @param  int  $id
    * @return \Illuminate\Http\Response
@@ -70,14 +70,14 @@ class WorkAreaController extends Controller
       if (!isset($workarea))
         return $this->responseNoContent();
 
-      return $this->responseSuccess($workarea->formatModel());
+      return $this->responseSuccess($workarea->format());
     } catch (\Exception $exception) {
       return $this->responseException($exception);
     }
   }
 
   /**
-   * Update the specified resource in storage.
+   * Update a WorkArea.
    *
    * @param  int  $id
    * @return \Illuminate\Http\Response
@@ -104,7 +104,7 @@ class WorkAreaController extends Controller
 
       DB::commit();
 
-      return $this->responseSuccess($workarea->fresh()->formatModel());
+      return $this->responseSuccess($workarea->fresh()->format());
     } catch (\Exception $exception) {
       DB::rollBack();
       return $this->responseException($exception);
@@ -112,7 +112,7 @@ class WorkAreaController extends Controller
   }
 
   /**
-   * Remove the specified resource from storage.
+   * Remove WorkArea.
    *
    * @param  int  $id
    * @return \Illuminate\Http\Response
@@ -154,7 +154,7 @@ class WorkAreaController extends Controller
   protected function validateData()
   {
     return request()->validate([
-      'description' => 'required|max:255',
+      'description' => 'required|unique|max:255',
       'state_id' => 'required|integer',
       'section_id' => 'required|integer'
     ]);

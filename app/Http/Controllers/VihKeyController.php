@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\VihKeyCollection;
-use App\VihKey;
-use Illuminate\Http\Request;
+use App\Http\Resources\Collections\VihKeyCollection;
+use App\Models\VihKey;
 use Illuminate\Support\Facades\DB;
 
 class VihKeyController extends Controller
@@ -97,7 +96,7 @@ class VihKeyController extends Controller
 
       $vihKey = $vihKey->create($dataStore);
 
-      return $this->responseSuccess($vihKey->formatModel());
+      return $this->responseSuccess($vihKey->format());
     } catch (\Exception $exception) {
       return $this->responseException($exception);
     }
@@ -123,7 +122,7 @@ class VihKeyController extends Controller
       if (!isset($vihKey))
         return $this->responseNoContent();
 
-      return $this->responseSuccess($vihKey->formatModel());
+      return $this->responseSuccess($vihKey->format());
     } catch (\Exception $exception) {
       return $this->responseException($exception);
     }
@@ -158,7 +157,7 @@ class VihKeyController extends Controller
 
       DB::commit();
 
-      return $this->responseSuccess($vihKey->fresh()->formatModel());
+      return $this->responseSuccess($vihKey->fresh()->format());
     } catch (\Exception $exception) {
       DB::rollBack();
       return $this->responseException($exception);
@@ -193,7 +192,7 @@ class VihKeyController extends Controller
 
       DB::commit();
 
-      return $this->responseSuccess($vihKey->fresh()->formatModel());
+      return $this->responseSuccess($vihKey->fresh()->format());
     } catch (\Exception $exception) {
       DB::rollBack();
       return $this->responseException($exception);

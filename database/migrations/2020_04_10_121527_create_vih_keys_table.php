@@ -15,9 +15,21 @@ class CreateVihKeysTable extends Migration
   {
     Schema::create('vih_keys', function (Blueprint $table) {
       $table->bigIncrements('id');
-      $table->string('description');
+      $table->string('description')->unique();
+      $table->integer('state_id');
+      $table->integer('user_created_id');
+      $table->integer('user_updated_id');
+      $table->integer('user_deleted_id')->nullable();
       $table->timestamps();
       $table->softDeletes();
+
+      $table->foreign('state_id')->references('id')->on('states');
+
+      $table->foreign('user_created_id')->references('id')->on('users');
+
+      $table->foreign('user_updated_id')->references('id')->on('users');
+
+      $table->foreign('user_deleted_id')->references('id')->on('users');
     });
   }
 

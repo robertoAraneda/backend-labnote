@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Jsons;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Carbon\Carbon;
@@ -24,7 +24,7 @@ class State extends JsonResource
       'updated_at' => $this->updated_at != null ?  Carbon::parse($this->updated_at)->format('Y-m-d H:i:s') : null,
       'deleted_at' => $this->deleted_at != null ?  Carbon::parse($this->deleted_at)->format('Y-m-d H:i:s') : null,
       'links' => [
-        'href' => url('api/v2/states/' . $this->id),
+        'href' => route('api.states.show', ['state' => $this->id]),
         'rel' => 'self'
       ]
     ];

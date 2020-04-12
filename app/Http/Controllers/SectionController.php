@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Section;
-use App\Http\Resources\Section as SectionResource;
-use App\Http\Resources\SectionCollection;
+use App\Models\Section;
+use App\Http\Resources\Jsons\Section as SectionResource;
+use App\Http\Resources\Collections\SectionCollection;
 use Illuminate\Support\Facades\DB;
 
 class SectionController extends Controller
@@ -45,7 +45,7 @@ class SectionController extends Controller
 
       $section = $section->create($dataStore);
 
-      return $this->responseSuccess($section->formatModel());
+      return $this->responseSuccess($section->format());
     } catch (\Exception $exception) {
       return $this->responseException($exception);
     }
@@ -71,7 +71,7 @@ class SectionController extends Controller
       if (!isset($section))
         return $this->responseNoContent();
 
-      return $this->responseSuccess($section->formatModel());
+      return $this->responseSuccess($section->format());
     } catch (\Exception $exception) {
       return $this->responseException($exception);
     }
@@ -105,7 +105,7 @@ class SectionController extends Controller
 
       DB::commit();
 
-      return $this->responseSuccess($section->fresh()->formatModel());
+      return $this->responseSuccess($section->fresh()->format());
     } catch (\Exception $exception) {
       DB::rollBack();
       return $this->responseException($exception);
@@ -161,9 +161,9 @@ class SectionController extends Controller
         return $this->responseNoContent();
 
       $section['data'] = [
-        'href' => url('api/v2/sections/' . $idSection . '/work-areas'),
+        'href' => route('api.sections.workAreas', ['section' => $section->id]),
         'rel' => 'work-areas',
-        'sections' => $section->workAreas->map->formatModel()
+        'sections' => $section->workAreas->map->format()
       ];
 
       return $this->responseSuccess($section->workAreas);
@@ -182,6 +182,8 @@ class SectionController extends Controller
     return request()->validate([
       'description' => 'required|max:255',
       'state_id' => 'required|integer',
+      'user_created_id' => 'nullable|required|integer',
+      'user_updated_id' => 'nullable|required|integer'
     ]);
   }
   /**

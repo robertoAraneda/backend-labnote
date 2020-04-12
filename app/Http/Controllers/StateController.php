@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\StateCollection;
-use App\Http\Resources\State as StateResource;
-use App\Http\Resources\WorkArea as WorkareaResource;
-use App\State;
+use App\Http\Resources\Collections\StateCollection;
+use App\Http\Resources\Jsons\State as StateResource;
+use App\Http\Resources\Jsons\WorkArea as WorkareaResource;
+use App\Models\State;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class StateController extends Controller
 {
@@ -32,15 +33,19 @@ class StateController extends Controller
       if (!request()->isJson())
         return $this->responseUnauthorized();
 
-      $dataStore = $this->validateData();
+      $valitate = $this->validateData();
+
+      if ($valitate->fails())
+        return $this->responseException($valitate->errors()->first());
 
       $state = new State();
 
-      $state = $state->create($dataStore);
+      $state = $state->create(request()->all());
 
-      return $this->responseSuccess($state->formatModel());
+      return $this->responseSuccess($state->format());
     } catch (\Exception $exception) {
-      return $this->responseException($exception);
+
+      return $this->responseException($exception->getMessage());
     }
   }
 
@@ -59,7 +64,7 @@ class StateController extends Controller
       if (!isset($state))
         return $this->responseNoContent();
 
-      return $this->responseSuccess($state->formatModel());
+      return $this->responseSuccess($state->format());
     } catch (\Exception $exception) {
       return $this->responseException($exception);
     }
@@ -87,7 +92,7 @@ class StateController extends Controller
 
       DB::commit();
 
-      return $this->responseSuccess($state->fresh()->formatModel());
+      return $this->responseSuccess($state->fresh()->format());
     } catch (\Exception $exception) {
       DB::rollBack();
       return $this->responseException($exception);
@@ -133,14 +138,15 @@ class StateController extends Controller
       $state = new StateResource(State::find($idState));
 
       $state['sections'] = [
-        'href' => url('api/v2/states/' . $idState . '/sections'),
+        'state' => $state,
+        'href' => route('api.states.sections', ['state' => $state->id]),
         'rel' => 'sections',
-        'sections' => $state->sections->map->formatModel()
+        'sections' => $state->sections->map->format()
       ];
 
       return $this->responseSuccess($state->sections);
     } catch (\Exception $exception) {
-      return $this->responseException($exception);
+      return $this->responseException($exception->getMessage());
     }
   }
 
@@ -152,9 +158,10 @@ class StateController extends Controller
         $state = new WorkareaResource(State::find($idState));
 
         $state['workareas'] = [
-          'href' => url('api/v2/states/' . $idState . '/workareas'),
+          'state' => $state,
+          'href' => route('api.states.workAreas', ['state' => $state->id]),
           'rel' => 'workareas',
-          'workareas' => $state->workareas->map->formatModel()
+          'workareas' => $state->workareas->map->format()
         ];
 
         return $this->responseSuccess($state->workareas);
@@ -177,9 +184,9 @@ class StateController extends Controller
 
       $state['vihKeys'] = [
         'state' => $state,
-        'href' => url('api/v2/states/' . $idState . '/vih-keys'),
+        'href' => route('api.states.vihKeys', ['state' => $state->id]),
         'rel' => 'vih-keys',
-        'vihKeys' => $state->vihKeys->map->formatModel()
+        'vihKeys' => $state->vihKeys->map->format()
       ];
 
       return $this->responseSuccess($state->vihKeys);
@@ -190,9 +197,11 @@ class StateController extends Controller
 
   protected function validateData()
   {
-    return request()->validate([
-      'description' => 'required|max:255'
+
+    $validator = Validator::make(request()->all(), [
+      'description' => 'required|unique:states|max:255'
     ]);
+    return $validator;
   }
   protected function responseSuccess($data)
   {
@@ -208,7 +217,7 @@ class StateController extends Controller
     return response()->json([
       'success' => false,
       'data' => null,
-      'error' => $exception->getMessage(),
+      'error' => $exception,
       'statusCode' => 500
     ]);
   }

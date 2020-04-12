@@ -1,7 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
@@ -14,18 +15,20 @@ class WorkArea extends Model
 
   protected $guarded = [];
 
-  public function formatModel()
+  public function format()
   {
     return [
       'id' => $this->id,
       'description' => $this->description,
-      'state' => $this->state,
-      'section' => $this->section,
+      'state' => $this->state->format(),
+      'section' => $this->section->format(),
+      'user_created' => $this->userCreated->format(),
+      'user_updated' => $this->userUpdated->format(),
       'created_at' => $this->created_at != null ?  Carbon::parse($this->created_at)->format('Y-m-d H:i:s') : null,
       'updated_at' => $this->updated_at != null ?  Carbon::parse($this->updated_at)->format('Y-m-d H:i:s') : null,
       'deleted_at' => $this->deleted_at != null ?  Carbon::parse($this->deleted_at)->format('Y-m-d H:i:s') : null,
       'links' => [
-        'href' => url('api/v2/work-areas/' . $this->id),
+        'href' => url('api.workAreas.show', ['work_area' => $this->id]),
         'rel' => 'self'
       ]
     ];
@@ -34,6 +37,17 @@ class WorkArea extends Model
   public function state()
   {
     return $this->belongsTo(State::class);
+  }
+
+
+  public function userCreated()
+  {
+    return $this->belongsTo(User::class);
+  }
+
+  public function userUpdated()
+  {
+    return $this->belongsTo(User::class);
   }
 
   public function section()

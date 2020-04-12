@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Collections;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Carbon\Carbon;
 
-class StateCollection extends ResourceCollection
+class WorkareaCollection extends ResourceCollection
 {
   /**
    * Transform the resource collection into an array.
@@ -16,11 +15,12 @@ class StateCollection extends ResourceCollection
   public function toArray($request)
   {
     return [
-      'states' => $this->collection,
       'links' => [
-        'href' => url('api/v2/states'),
+        'href' => route('api.workAreas.index'),
         'rel' => 'self'
-      ]
+      ],
+      'workAreas' => $this->collection->map->format()
+
     ];
   }
 }

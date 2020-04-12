@@ -38,4 +38,18 @@ class User extends Authenticatable
   protected $casts = [
     'email_verified_at' => 'datetime',
   ];
+
+
+  public function format()
+  {
+    return [
+      'id' => $this->id,
+      'name' => $this->name,
+      'email' => $this->email,
+      'links' => [
+        'href' => url('api/v2/users/' . $this->id),
+        'rel' => 'self'
+      ]
+    ];
+  }
 }

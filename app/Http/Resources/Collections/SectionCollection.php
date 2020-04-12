@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Collections;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class VihKeyCollection extends ResourceCollection
+class SectionCollection extends ResourceCollection
 {
   /**
    * Transform the resource collection into an array.
@@ -15,11 +15,12 @@ class VihKeyCollection extends ResourceCollection
   public function toArray($request)
   {
     return [
-      'vihKeys' => $this->collection,
       'links' => [
-        'href' => url('api/v2/vih-keys'),
+        'href' => route('api.sections.index'),
         'rel' => 'self'
-      ]
+      ],
+      'sections' => $this->collection->map->format()
+
     ];
   }
 }
