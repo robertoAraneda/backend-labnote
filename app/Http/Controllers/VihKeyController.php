@@ -2,62 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\MakeResponse;
 use App\Http\Resources\Collections\VihKeyCollection;
 use App\Models\VihKey;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class VihKeyController extends Controller
 {
-  protected function validateData()
+
+
+  protected function validateData($request)
   {
-    return request()->validate([
-      'description' => 'required|max:255',
+
+    return Validator::make($request, [
+      'description' => 'required|unique:vih_keys|max:255',
       'state_id' => 'required|integer'
-    ]);
-  }
-  protected function responseSuccess($data)
-  {
-    return response()->json([
-      'success' => true,
-      'data' => $data,
-      'error' => null,
-      'statusCode' => 200
-    ]);
-  }
-  protected function responseException($exception)
-  {
-    return response()->json([
-      'success' => false,
-      'data' => null,
-      'error' => $exception->getMessage(),
-      'statusCode' => 500
-    ]);
-  }
-  protected function responseUnauthorized()
-  {
-    return response()->json([
-      'success' => false,
-      'data' => null,
-      'error' => 'Sin autorización',
-      'statusCode' => 401
-    ]);
-  }
-  protected function responseBadRequest()
-  {
-    return response()->json([
-      'success' => false,
-      'data' => null,
-      'error' => 'Url mal formada. Detente!!',
-      'statusCode' => 400
-    ]);
-  }
-  protected function responseNoContent()
-  {
-    return response()->json([
-      'success' => false,
-      'data' => null,
-      'error' => 'Elemento no encontrado',
-      'statusCode' => 204
     ]);
   }
   /**
@@ -69,13 +29,13 @@ class VihKeyController extends Controller
   {
     try {
       if (!request()->isJson())
-        return $this->responseUnauthorized();
+        return MakeResponse::unauthorized();
 
       $vihKeys = new VihKeyCollection(VihKey::all());
 
-      return $this->responseSuccess($vihKeys);
+      return MakeResponse::success($vihKeys);
     } catch (\Exception $exception) {
-      return $this->responseException($exception);
+      return MakeResponse::exception($exception->getMessage());
     }
   }
 
@@ -88,17 +48,20 @@ class VihKeyController extends Controller
   {
     try {
       if (!request()->isJson())
-        return $this->responseUnauthorized();
+        return MakeResponse::unauthorized();
 
-      $dataStore = $this->validateData();
+      $valitate = $this->validateData(request()->all());
+
+      if ($valitate->fails())
+        return MakeResponse::exception($valitate->errors());
 
       $vihKey = new VihKey();
 
-      $vihKey = $vihKey->create($dataStore);
+      $vihKey = $vihKey->create(request()->all());
 
-      return $this->responseSuccess($vihKey->format());
+      return MakeResponse::success($vihKey->format());
     } catch (\Exception $exception) {
-      return $this->responseException($exception);
+      return MakeResponse::exception($exception->getMessage());
     }
   }
 
@@ -112,26 +75,25 @@ class VihKeyController extends Controller
   {
     try {
       if (!request()->isJson())
-        return $this->responseUnauthorized();
+        return MakeResponse::unauthorized();
 
       if (!is_numeric($id))
-        return $this->responseBadRequest();
+        return MakeResponse::badRequest();
 
       $vihKey = VihKey::whereId($id)->first();
 
       if (!isset($vihKey))
-        return $this->responseNoContent();
+        return MakeResponse::noContent();
 
-      return $this->responseSuccess($vihKey->format());
+      return MakeResponse::success($vihKey->format());
     } catch (\Exception $exception) {
-      return $this->responseException($exception);
+      return MakeResponse::exception($exception->getMessage());
     }
   }
 
   /**
    * Update the specified resource in storage.
    *
-   * @param  \Illuminate\Http\Request  $request
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
@@ -140,27 +102,30 @@ class VihKeyController extends Controller
     try {
 
       if (!request()->isJson())
-        return $this->responseUnauthorized();
+        return MakeResponse::unauthorized();
 
       if (!is_numeric($id))
-        return $this->responseBadRequest();
+        return MakeResponse::badRequest();
 
       $vihKey = VihKey::whereId($id)->first();
 
       if (!isset($vihKey))
-        return $this->responseNoContent();
+        return MakeResponse::noContent();
 
       DB::beginTransaction();
-      $dataUpdate = $this->validateData();
+      $valitate = $this->validateData(request()->all());
 
-      $vihKey->update($dataUpdate);
+      if ($valitate->fails())
+        return MakeResponse::exception($valitate->errors());
+
+      $vihKey->update(request()->all());
 
       DB::commit();
 
-      return $this->responseSuccess($vihKey->fresh()->format());
+      return MakeResponse::success($vihKey->fresh()->format());
     } catch (\Exception $exception) {
       DB::rollBack();
-      return $this->responseException($exception);
+      return MakeResponse::exception($exception->getMessage());
     }
   }
 
@@ -175,27 +140,29 @@ class VihKeyController extends Controller
     try {
 
       if (!request()->isJson())
-        return $this->responseUnauthorized();
+        return MakeResponse::unauthorized();
 
       if (!is_numeric($id))
-        return $this->responseBadRequest();
+        return MakeResponse::badRequest();
 
       $vihKey = VihKey::whereId($id)->first();
 
       if (!isset($vihKey))
-        return $this->responseNoContent();
+        return MakeResponse::noContent();
 
       DB::beginTransaction();
-      $dataDelete = $this->validateData();
 
-      $vihKey->delete($dataDelete);
+      $vihKey->user_deleted_id = auth()->id();
+      $vihKey->update($vihKey);
+
+      $vihKey->delete($vihKey);
 
       DB::commit();
 
-      return $this->responseSuccess($vihKey->fresh()->format());
+      return MakeResponse::success(null);
     } catch (\Exception $exception) {
       DB::rollBack();
-      return $this->responseException($exception);
+      return MakeResponse::exception($exception->getMessage());
     }
   }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\Collections\WorkareaCollection;
 use App\Models\WorkArea;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class WorkAreaController extends Controller
 {
@@ -38,11 +39,14 @@ class WorkAreaController extends Controller
       if (!request()->isJson())
         return $this->responseUnauthorized();
 
-      $dataStore = $this->validateData();
+      $valitate = $this->validateData();
+
+      if ($valitate->fails())
+        return $this->responseException($valitate->errors()->first());
 
       $workarea = new WorkArea();
 
-      $workarea = $workarea->create($dataStore);
+      $workarea = $workarea->create(request()->all());
 
       return $this->responseSuccess($workarea->format());
     } catch (\Exception $exception) {
@@ -98,9 +102,12 @@ class WorkAreaController extends Controller
         return $this->responseNoContent();
 
       DB::beginTransaction();
-      $dataUpdate = $this->validateData();
+      $valitate = $this->validateData();
 
-      $workarea->update($dataUpdate);
+      if ($valitate->fails())
+        return $this->responseException($valitate->errors()->first());
+
+      $workarea->update(request()->all());
 
       DB::commit();
 
@@ -133,9 +140,12 @@ class WorkAreaController extends Controller
         return $this->responseNoContent();
 
       DB::beginTransaction();
-      $dataDelete = $this->validateData();
+      $valitate = $this->validateData();
 
-      $workarea->delete($dataDelete);
+      if ($valitate->fails())
+        return $this->responseException($valitate->errors()->first());
+
+      $workarea->delete(request()->all());
 
       DB::commit();
 
@@ -153,8 +163,8 @@ class WorkAreaController extends Controller
    */
   protected function validateData()
   {
-    return request()->validate([
-      'description' => 'required|unique|max:255',
+    return Validator::make(request()->all(), [
+      'description' => 'required|unique:work_areas|max:255',
       'state_id' => 'required|integer',
       'section_id' => 'required|integer'
     ]);

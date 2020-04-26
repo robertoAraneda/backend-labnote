@@ -86,9 +86,13 @@ class StateController extends Controller
         return $this->responseNoContent();
 
       DB::beginTransaction();
-      $dataUpdate = $this->validateData();
 
-      $state->update($dataUpdate);
+      $valitate = $this->validateData();
+
+      if ($valitate->fails())
+        return $this->responseException($valitate->errors()->first());
+
+      $state->update(request()->all());
 
       DB::commit();
 
@@ -115,9 +119,12 @@ class StateController extends Controller
         return $this->responseNoContent();
 
       DB::beginTransaction();
-      $dataDelete = $this->validateData();
+      $valitate = $this->validateData();
 
-      $state->delete($dataDelete);
+      if ($valitate->fails())
+        return $this->responseException($valitate->errors()->first());
+
+      $state->delete(request()->all());
 
       DB::commit();
 
@@ -198,10 +205,9 @@ class StateController extends Controller
   protected function validateData()
   {
 
-    $validator = Validator::make(request()->all(), [
+    return Validator::make(request()->all(), [
       'description' => 'required|unique:states|max:255'
     ]);
-    return $validator;
   }
   protected function responseSuccess($data)
   {
